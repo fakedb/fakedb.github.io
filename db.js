@@ -1,19 +1,12 @@
-var db = null;
-
-function loadDB() {
-  db = JSON.parse( window.localStorage.database || '{}' );
-  
-  // hook into db change operations to call saveDB()
-  var p = new Proxy(db, {
-    set: function(target, prop, value, receiver) {
-      target[prop] = value;
-      saveDB();
+var db = new Proxy(JSON.parse( window.localStorage.database || '{}' ), {
+  set: function(target, prop, value, receiver) {
+    target[prop] = value;
+    window.localStorage.database = JSON.stringify(target);
+  },
+  deleteProperty: function(target, prop) {
+    if(prop in target) {
+      delete target[prop];
     }
-  });
-}
-
-function saveDB() {
-  window.localStorage.database = JSON.stringify( db );
-}
-
-loadDB();
+    window.localStorage.database = JSON.stringify(target);
+  }
+});
